@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  EDITOR
+  AUTHOR
+  VIEWER
+}
+
+enum Status {
+  DRAFT
+  PENDING
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PostType {
+  NEWS
+  BLOG
+  ANNOUNCEMENT
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(VIEWER)
+  posts         Post[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Post {
+  id             String         @id @default(cuid())
+  title          String
+  slug           String         @unique
+  excerpt        String?
+  content        String         @db.Text
+  featuredImage  String?
+  status         Status         @default(DRAFT)
+  type           PostType       @default(BLOG)
+  publishedAt    DateTime?
+  scheduledFor   DateTime?
+  authorId       String         @map("author_id")
+  author         User           @relation(fields: [authorId], references: [id])
+  categories     Category[]
+  tags           Tag[]
+  seoTitle       String?        @map("seo_title")
+  seoDescription String?        @map("seo_description")
+  seoKeywords    String?        @map("seo_keywords")
+  viewCount      Int            @default(0) @map("view_count")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([status])
+  @@index([type])
+  @@index([publishedAt])
+  @@map("posts")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  posts       Post[]
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  posts     Post[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("tags")
+}
+
+model Media {
+  id         String   @id @default(cuid())
+  filename   String
+  url        String
+  mimetype   String
+  size       Int
+  alt        String?
+  uploadedBy String   @map("uploaded_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("media")
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  type        String   // Weekly, Monthly, Special Event
+  description String   @db.Text
+  details     String?  @db.Text
+  date        DateTime
+  time        String
+  location    String
+  image       String?
+  status      Status   @default(DRAFT)
+  publishedAt DateTime?
+  authorId    String   @map("author_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([status])
+  @@index([date])
+  @@map("events")
+}
+
+model Sermon {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String   @db.Text
+  details     String?  @db.Text
+  date        DateTime
+  time        String
+  location    String
+  preacher    String
+  image       String?
+  status      Status   @default(DRAFT)
+  publishedAt DateTime?
+  authorId    String   @map("author_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([status])
+  @@index([date])
+  @@map("sermons")
+}
+
+model SiteSettings {
+  id                String   @id @default(cuid())
+  siteName          String   @default("Fellowship Church")
+  siteTagline       String?  @default("Welcome to our community")
+  logo              String?
+  favicon           String?
+  primaryColor      String   @default("#FFD7A8")
+  darkColor         String   @default("#1A1D23")
+  seoTitle          String?
+  seoDescription    String?
+  seoKeywords       String?
+  ogImage           String?
+  contactEmail      String?
+  contactPhone      String?
+  address           String?
+  socialFacebook    String?
+  socialInstagram   String?
+  socialTwitter     String?
+  socialYoutube     String?
+  googleAnalyticsId String?
+  facebookPixelId   String?
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
