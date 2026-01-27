@@ -5,6 +5,7 @@ import Footer from "@/components/shared/Footer";
 import { Calendar, Clock, User } from "lucide-react";
 import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getYouTubeEmbedUrl } from "@/lib/youtube";
 
 type Sermon = {
   id: string;
@@ -61,6 +62,7 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
 
   const sermonDate = new Date(sermon.date);
   const sermonImage = sermon.media?.[0]?.url || "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80";
+  const embedUrl = sermon.videoUrl ? getYouTubeEmbedUrl(sermon.videoUrl) : null;
 
   return (
     <>
@@ -90,20 +92,21 @@ export default function SermonDetailPage({ params }: { params: Promise<{ id: str
             {/* Main Content */}
             <div className="lg:col-span-2">
               {/* Video */}
-              {sermon.videoUrl && (
+              {embedUrl && (
                 <div className="mb-8">
                   <div className="aspect-video">
                     <iframe
-                      src={sermon.videoUrl}
+                      src={embedUrl}
                       className="w-full h-full rounded-lg"
                       allowFullScreen
+                      title="Sermon Video"
                     ></iframe>
                   </div>
                 </div>
               )}
 
               {/* Audio */}
-              {sermon.audioUrl && !sermon.videoUrl && (
+              {sermon.audioUrl && !embedUrl && (
                 <div className="mb-8">
                   <audio controls className="w-full">
                     <source src={sermon.audioUrl} type="audio/mpeg" />

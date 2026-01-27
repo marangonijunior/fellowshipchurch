@@ -16,6 +16,7 @@ export default function NewEventPage() {
     location: "",
     description: "",
     content: "",
+    videoUrl: "",
     status: "DRAFT" as "DRAFT" | "PUBLISHED",
   });
   const [featuredImage, setFeaturedImage] = useState<string>("");
@@ -160,6 +161,21 @@ export default function NewEventPage() {
             />
             <p className="text-xs text-gray-500 mt-2">
               You can use HTML tags for formatting. This will be displayed on the event detail page.
+            </p>
+          </div>
+
+          {/* Video URL */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <label className="block text-sm font-medium mb-2">YouTube Video URL</label>
+            <input
+              type="url"
+              value={formData.videoUrl}
+              onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+              className="w-full px-4 py-2 border rounded-lg"
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Paste a YouTube URL to embed a video on the event page. Leave empty if no video.
             </p>
           </div>
 

@@ -157,6 +157,7 @@ model Event {
   time        String
   location    String
   image       String?
+  videoUrl    String?  @map("video_url")
   status      Status   @default(DRAFT)
   publishedAt DateTime?
   authorId    String   @map("author_id")

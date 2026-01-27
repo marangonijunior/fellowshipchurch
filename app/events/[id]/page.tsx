@@ -6,6 +6,7 @@ import { Calendar, MapPin, Clock } from "lucide-react";
 import { addToCalendar } from "@/lib/calendar";
 import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getYouTubeEmbedUrl } from "@/lib/youtube";
 
 type Event = {
   id: string;
@@ -16,6 +17,7 @@ type Event = {
   location: string;
   description: string;
   content: string | null;
+  videoUrl?: string | null;
   media?: { url: string }[];
 };
 
@@ -65,6 +67,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const eventDate = new Date(event.date);
   const eventTime = event.time || "Time TBD";
   const eventImage = event.media?.[0]?.url || "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80";
+  const embedUrl = event.videoUrl ? getYouTubeEmbedUrl(event.videoUrl) : null;
 
   return (
     <>
@@ -95,6 +98,20 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2">
+              {/* Video */}
+              {embedUrl && (
+                <div className="mb-8">
+                  <div className="aspect-video">
+                    <iframe
+                      src={embedUrl}
+                      className="w-full h-full rounded-lg"
+                      allowFullScreen
+                      title="Event Video"
+                    ></iframe>
+                  </div>
+                </div>
+              )}
+
               {event.content && (
                 <div
                   className="prose prose-lg max-w-none text-dark/70"
