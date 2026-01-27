@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Trash2, Upload, Image as ImageIcon } from "lucide-react";
-import { upload } from "@vercel/blob/client";
 
 type Media = {
   id: string;
@@ -40,22 +39,38 @@ export default function MediaPage() {
 
     setUploading(true);
     try {
-      const newBlob = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/upload",
+      // Upload to Vercel Blob using FormData
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
       });
 
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      const uploadData = await uploadResponse.json();
+
       // Save to database
-      await fetch("/api/media", {
+      const saveResponse = await fetch("/api/media", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          url: newBlob.url,
-          type: file.type,
-          fileName: file.name,
-          fileSize: file.size,
+          url: uploadData.data.url,
+          filename: uploadData.data.filename,
+          mimetype: uploadData.data.type,
+          size: uploadData.data.size,
         }),
       });
+
+      if (!saveResponse.ok) {
+        const errorData = await saveResponse.json();
+        console.error("Failed to save to database:", errorData);
+        throw new Error('Failed to save media to database');
+      }
 
       fetchMedia();
     } catch (error) {

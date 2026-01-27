@@ -15,17 +15,26 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log("Received media data:", body);
+    
     const media = await db.media.create({
       data: {
         url: body.url,
-        filename: body.fileName,
-        mimetype: body.type,
-        size: body.fileSize,
+        filename: body.filename,
+        mimetype: body.mimetype,
+        size: body.size,
         uploadedBy: "system", // TODO: Get from session
       },
     });
+    
+    console.log("Created media:", media);
     return NextResponse.json(media);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to create media" }, { status: 500 });
+    console.error("Error creating media:", error);
+    console.error("Error details:", JSON.stringify(error, null, 2));
+    return NextResponse.json({ 
+      error: "Failed to create media",
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }

@@ -1,7 +1,33 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 import { Facebook, Twitter, Linkedin } from "lucide-react";
 
+type Settings = {
+  siteName?: string;
+  logo?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  facebookUrl?: string;
+  twitterUrl?: string;
+  linkedinUrl?: string;
+};
+
 export default function Footer() {
+  const [settings, setSettings] = useState<Settings>({});
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => setSettings(data))
+      .catch((err) => console.error("Error loading settings:", err));
+  }, []);
+
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-dark text-white py-16">
       <div className="container-custom">
@@ -9,14 +35,23 @@ export default function Footer() {
           {/* Logo & Info */}
           <div>
             <Link href="/" className="text-2xl font-heading font-bold inline-block mb-6">
-              <span className="text-primary">[</span>Finsweet
+              {settings.logo ? (
+                <Image src={settings.logo} alt={settings.siteName || "Logo"} width={120} height={40} className="h-10 w-auto" />
+              ) : (
+                <>
+                  <span className="text-primary">[</span>{settings.siteName || "Finsweet"}
+                </>
+              )}
             </Link>
             <p className="text-gray-400 text-sm mb-4">
-              © Copyright Finsweet 2022
+              © Copyright {settings.siteName || "Finsweet"} {currentYear}
             </p>
-            <p className="text-gray-400 text-sm mb-2">(480) 555-0103</p>
-            <p className="text-gray-400 text-sm mb-2">4517 Washington Ave.</p>
-            <p className="text-gray-400 text-sm">Manchester, Kentucky 39495</p>
+            {settings.phone && (
+              <p className="text-gray-400 text-sm mb-2">{settings.phone}</p>
+            )}
+            {settings.address && (
+              <p className="text-gray-400 text-sm">{settings.address}</p>
+            )}
           </div>
 
           {/* Quicklinks */}
@@ -50,33 +85,39 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-6">Connect</h3>
             <div className="flex space-x-4">
-              <Link
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-dark-light flex items-center justify-center hover:bg-primary hover:text-dark transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook size={20} />
-              </Link>
-              <Link
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-dark-light flex items-center justify-center hover:bg-primary hover:text-dark transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter size={20} />
-              </Link>
-              <Link
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-dark-light flex items-center justify-center hover:bg-primary hover:text-dark transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={20} />
-              </Link>
+              {settings.facebookUrl && (
+                <Link
+                  href={settings.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-dark-light flex items-center justify-center hover:bg-primary hover:text-dark transition-colors"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={20} />
+                </Link>
+              )}
+              {settings.twitterUrl && (
+                <Link
+                  href={settings.twitterUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-dark-light flex items-center justify-center hover:bg-primary hover:text-dark transition-colors"
+                  aria-label="Twitter"
+                >
+                  <Twitter size={20} />
+                </Link>
+              )}
+              {settings.linkedinUrl && (
+                <Link
+                  href={settings.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-dark-light flex items-center justify-center hover:bg-primary hover:text-dark transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin size={20} />
+                </Link>
+              )}
             </div>
           </div>
 
