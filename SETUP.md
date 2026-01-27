@@ -24,16 +24,15 @@ npm install
 Create a `.env` file in the root directory:
 
 ```env
-# Database (Vercel Postgres)
-POSTGRES_URL="your-postgres-url"
-POSTGRES_PRISMA_URL="your-postgres-prisma-url"
-POSTGRES_URL_NON_POOLING="your-postgres-url-non-pooling"
+# Database - Neon Postgres
+DATABASE_URL="postgresql://user:password@host-pooler.region.aws.neon.tech/database?sslmode=require"
+POSTGRES_PRISMA_URL="postgresql://user:password@host-pooler.region.aws.neon.tech/database?connect_timeout=15&sslmode=require"
 
 # NextAuth
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-generated-secret-key"
 
-# Vercel Blob (Optional - for media upload)
+# Vercel Blob Storage (Optional - for media upload)
 BLOB_READ_WRITE_TOKEN="your-blob-token"
 ```
 
@@ -42,36 +41,50 @@ BLOB_READ_WRITE_TOKEN="your-blob-token"
 openssl rand -base64 32
 ```
 
-### Step 3: Setup Vercel Postgres Database
+### Step 3: Setup Neon Postgres Database
 
-#### Option A: Using Vercel Dashboard (Recommended)
+> **Note:** Vercel Postgres (built-in) was discontinued. We now use **Neon Postgres** as the recommended serverless PostgreSQL solution.
 
-1. Go to https://vercel.com/dashboard
-2. Create or select your project
-3. Navigate to **Storage** tab
-4. Click **Create Database** → Select **Postgres**
-5. Choose a region close to your users
-6. Click **Create**
-7. Copy the `.env.local` tab contents to your `.env` file
+#### Option A: Using Neon Dashboard (Recommended)
 
-#### Option B: Using Vercel CLI
+1. Go to https://console.neon.tech
+2. Sign up or login with GitHub/Google
+3. Click **Create a project**
+4. Choose:
+   - **Project Name:** fellowshipchurch
+   - **Region:** Choose closest to your users (e.g., AWS eu-west-2)
+   - **Database Name:** neondb (default)
+5. Click **Create Project**
+6. Copy the connection string from **Connection Details**
+7. You'll get two URLs:
+   - **Pooled connection** (recommended) → Use for `DATABASE_URL` and `POSTGRES_PRISMA_URL`
+   - **Direct connection** → Use for `DATABASE_URL_UNPOOLED`
+8. Paste the connection strings into your `.env` file
+
+#### Option B: Using Neon CLI
 
 ```bash
-# Install Vercel CLI globally
-npm i -g vercel
+# Install Neon CLI globally
+npm i -g neonctl
 
-# Login to Vercel
-vercel login
+# Login to Neon
+neonctl auth
 
-# Link your project
-vercel link
+# Create a new project
+neonctl projects create --name fellowshipchurch
 
-# Create Postgres database
-vercel postgres create
-
-# Pull environment variables
-vercel env pull .env
+# Get connection string
+neonctl connection-string --project-id your-project-id
 ```
+
+#### Why Neon?
+
+- ✅ **Serverless** with instant cold starts
+- ✅ **Branching** for dev/staging environments
+- ✅ **Generous free tier** (512 MB storage, 0.5 GB data transfer)
+- ✅ **Auto-scaling** and auto-pause
+- ✅ **Built-in connection pooling** (pgbouncer)
+- ✅ **Compatible** with all Prisma/Vercel templates
 
 ### Step 4: Push Database Schema
 

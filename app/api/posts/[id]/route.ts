@@ -6,11 +6,12 @@ import { generateSlug } from "@/lib/utils";
 // GET /api/posts/[id] - Get a single post
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const post = await db.post.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         author: {
           select: {
@@ -34,7 +35,7 @@ export async function GET(
 
     // Increment view count
     await db.post.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { viewCount: { increment: 1 } },
     });
 
@@ -51,9 +52,10 @@ export async function GET(
 // PUT /api/posts/[id] - Update a post
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session || !["SUPER_ADMIN", "EDITOR", "AUTHOR"].includes(session.user.role)) {
       return NextResponse.json(
@@ -66,7 +68,7 @@ export async function PUT(
     const { title, content, excerpt, type, status, featuredImage, categories, tags, seoTitle, seoDescription } = body;
 
     const existingPost = await db.post.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!existingPost) {
@@ -121,7 +123,7 @@ export async function PUT(
     }
 
     const post = await db.post.update({
-      where: { id: params.id },
+      where: { id: id },
       data: updateData,
       include: {
         author: {
@@ -150,9 +152,10 @@ export async function PUT(
 // DELETE /api/posts/[id] - Delete a post
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session || !["SUPER_ADMIN", "EDITOR"].includes(session.user.role)) {
       return NextResponse.json(
@@ -162,7 +165,7 @@ export async function DELETE(
     }
 
     const existingPost = await db.post.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!existingPost) {
@@ -173,7 +176,7 @@ export async function DELETE(
     }
 
     await db.post.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     return NextResponse.json({ message: "Post deleted successfully" });

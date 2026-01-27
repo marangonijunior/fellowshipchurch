@@ -4,47 +4,68 @@ import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { addToCalendar } from "@/lib/calendar";
+import { notFound } from "next/navigation";
+import { useEffect, useState } from "react";
 
-// Mock data - will be replaced with database query
-const event = {
-  id: "1",
-  title: "Sunday Worship Service",
-  type: "Weekly",
-  date: new Date("2026-02-02"),
-  time: "10:00 AM - 12:00 PM",
-  location: "Main Sanctuary, 4517 Washington Ave., Manchester, Kentucky",
-  description: "Join us for our weekly worship service featuring inspiring messages, uplifting music, and fellowship with our church community.",
-  image: "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80",
-  details: `
-    <h2>About This Event</h2>
-    <p>Our Sunday Worship Service is the heart of our church community. Every Sunday, we gather together to worship God, hear His Word preached, and fellowship with one another.</p>
-    
-    <h3>What to Expect</h3>
-    <ul>
-      <li>Welcome and announcements (10:00 AM)</li>
-      <li>Contemporary worship music (10:15 AM)</li>
-      <li>Children's ministry available for ages 0-12</li>
-      <li>Inspiring message from our pastoral team (11:00 AM)</li>
-      <li>Prayer and response time (11:45 AM)</li>
-      <li>Fellowship coffee after service</li>
-    </ul>
-
-    <h3>What to Bring</h3>
-    <ul>
-      <li>Your Bible (or use our church app)</li>
-      <li>An open heart ready to worship</li>
-      <li>Friends and family who might benefit from community</li>
-    </ul>
-
-    <h3>Dress Code</h3>
-    <p>Come as you are! We welcome casual to business casual attire. The most important thing is that you're comfortable.</p>
-
-    <h3>Accessibility</h3>
-    <p>Our facility is fully wheelchair accessible with designated parking spaces near the entrance. ASL interpretation is available upon request with 48 hours notice.</p>
-  `,
+type Event = {
+  id: string;
+  title: string;
+  type: string | null;
+  date: Date;
+  time: string | null;
+  location: string;
+  description: string;
+  content: string | null;
+  media?: { url: string }[];
 };
 
-export default function EventDetailPage({ params }: { params: { id: string } }) {
+async function getEvent(id: string) {
+  try {
+    const res = await fetch(`/api/events/${id}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { ...data, date: new Date(data.date) };
+  } catch (error) {
+    console.error("Error fetching event:", error);
+    return null;
+  }
+}
+
+export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [eventId, setEventId] = useState<string>("");
+
+  useEffect(() => {
+    params.then(({ id }) => {
+      setEventId(id);
+      return getEvent(id);
+    }).then((data) => {
+      setEvent(data);
+      setLoading(false);
+    });
+  }, [params]);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!event) {
+    notFound();
+  }
+
+  const eventDate = new Date(event.date);
+  const eventTime = event.time || "Time TBD";
+  const eventImage = event.media?.[0]?.url || "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80";
+
   return (
     <>
       <Header />
@@ -53,11 +74,11 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       <section className="relative h-[500px] bg-gradient-to-r from-dark/80 to-dark/60">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-30"
-          style={{ backgroundImage: `url(${event.image})` }}
+          style={{ backgroundImage: `url(${eventImage})` }}
         ></div>
         <div className="relative container-custom h-full flex flex-col justify-center text-white">
           <span className="inline-block px-4 py-2 bg-primary text-dark text-sm font-semibold rounded-full mb-4 w-fit">
-            {event.type}
+            {event.type || "Event"}
           </span>
           <h1 className="text-5xl md:text-6xl font-heading font-bold mb-6">
             {event.title}
@@ -74,10 +95,12 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <div
-                className="prose prose-lg max-w-none text-dark/70"
-                dangerouslySetInnerHTML={{ __html: event.details }}
-              />
+              {event.content && (
+                <div
+                  className="prose prose-lg max-w-none text-dark/70"
+                  dangerouslySetInnerHTML={{ __html: event.content }}
+                />
+              )}
             </div>
 
             {/* Sidebar */}
@@ -86,10 +109,10 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 <div className="mb-8">
                   <div className="text-center mb-6">
                     <div className="text-6xl font-bold text-dark">
-                      {event.date.getDate()}
+                      {eventDate.getDate()}
                     </div>
                     <div className="text-lg uppercase text-dark/60">
-                      {event.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      {eventDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </div>
                   </div>
 
@@ -98,7 +121,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                       <Clock size={20} className="flex-shrink-0 mt-0.5 text-primary" />
                       <div>
                         <p className="font-semibold text-dark mb-1">Time</p>
-                        <p>{event.time}</p>
+                        <p>{eventTime}</p>
                       </div>
                     </div>
 
@@ -117,7 +140,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                     title: event.title,
                     description: event.description,
                     location: event.location,
-                    startDate: event.date,
+                    startDate: eventDate,
                   })}
                   className="btn-primary w-full"
                 >

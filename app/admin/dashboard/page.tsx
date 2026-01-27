@@ -1,24 +1,77 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FileText, Users, Image, Eye, PlusCircle } from "lucide-react";
+import { FileText, Users, Image, Eye, PlusCircle, Loader2 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+
+interface Stats {
+  totalPosts: number;
+  publishedPosts: number;
+  totalEvents: number;
+  totalSermons: number;
+}
+
+interface RecentPost {
+  id: string;
+  title: string;
+  status: string;
+  createdAt: string;
+}
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
+  const [stats, setStats] = useState<Stats>({
+    totalPosts: 0,
+    publishedPosts: 0,
+    totalEvents: 0,
+    totalSermons: 0,
+  });
+  const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const stats = [
-    { label: "Total Posts", value: "24", icon: FileText, color: "bg-blue-500" },
-    { label: "Published", value: "18", icon: Eye, color: "bg-green-500" },
-    { label: "Users", value: "5", icon: Users, color: "bg-purple-500" },
-    { label: "Media Files", value: "142", icon: Image, color: "bg-orange-500" },
-  ];
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        // Fetch all posts
+        const postsRes = await fetch("/api/posts");
+        const postsData = await postsRes.json();
+        const posts = postsData.success ? postsData.data : [];
 
-  const recentPosts = [
-    { id: 1, title: "How to show compassion", status: "Published", date: "2 days ago" },
-    { id: 2, title: "Faith is a process", status: "Draft", date: "3 days ago" },
-    { id: 3, title: "Celebrating freedom", status: "Published", date: "1 week ago" },
-  ];
+        // Fetch events
+        const eventsRes = await fetch("/api/events");
+        const eventsData = await eventsRes.json();
+        const events = eventsData.success ? eventsData.data : [];
+
+        // Fetch sermons
+        const sermonsRes = await fetch("/api/sermons");
+        const sermonsData = await sermonsRes.json();
+        const sermons = sermonsData.success ? sermonsData.data : [];
+
+        // Calculate stats
+        setStats({
+          totalPosts: posts.length,
+          publishedPosts: posts.filter((p: any) => p.status === "PUBLISHED").length,
+          totalEvents: events.length,
+          totalSermons: sermons.length,
+        });
+
+        // Get recent posts (last 5)
+        setRecentPosts(
+          posts
+            .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 5)
+        );
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="p-8">
@@ -27,7 +80,7 @@ export default function AdminDashboard() {
         <h1 className="text-3xl font-heading font-bold text-dark mb-2">
           Welcome back, {session?.user?.name}!
         </h1>
-        <p className="text-dark/60">Here's what's happening with your church website</p>
+        <p className="text-dark/60">Here&apos;s what&apos;s happening with your church website</p>
       </div>
 
       {/* Quick Actions */}
@@ -40,88 +93,101 @@ export default function AdminDashboard() {
           Create New Post
         </Link>
         <Link
-          href="/admin/media"
+          href="/admin/events"
           className="btn-outline inline-flex items-center gap-2"
         >
-          <Image size={20} />
-          Upload Media
+          <FileText size={20} />
+          Manage Events
         </Link>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div key={stat.label} className="bg-white rounded-lg p-6 shadow-sm">
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <div className={`${stat.color} w-12 h-12 rounded-lg flex items-center justify-center text-white`}>
-                  <Icon size={24} />
+                <div className="bg-blue-500 w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                  <FileText size={24} />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-dark mb-1">{stat.value}</h3>
-              <p className="text-dark/60 text-sm">{stat.label}</p>
+              <h3 className="text-2xl font-bold text-dark mb-1">{stats.totalPosts}</h3>
+              <p className="text-dark/60 text-sm">Total Posts</p>
             </div>
-          );
-        })}
-      </div>
 
-      {/* Recent Posts */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-heading font-bold text-dark">Recent Posts</h2>
-          <Link href="/admin/posts" className="text-primary hover:text-primary-dark text-sm font-semibold">
-            View all →
-          </Link>
-        </div>
-        <div className="space-y-4">
-          {recentPosts.map((post) => (
-            <div key={post.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-cream transition-colors">
-              <div className="flex-1">
-                <h3 className="font-semibold text-dark mb-1">{post.title}</h3>
-                <p className="text-sm text-dark/60">{post.date}</p>
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-green-500 w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                  <Eye size={24} />
+                </div>
               </div>
-              <div>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  post.status === "Published" 
-                    ? "bg-green-100 text-green-700" 
-                    : "bg-yellow-100 text-yellow-700"
-                }`}>
-                  {post.status}
-                </span>
-              </div>
+              <h3 className="text-2xl font-bold text-dark mb-1">{stats.publishedPosts}</h3>
+              <p className="text-dark/60 text-sm">Published Posts</p>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Activity Feed (Optional) */}
-      <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-heading font-bold text-dark mb-6">Recent Activity</h2>
-        <div className="space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="w-2 h-2 rounded-full bg-primary mt-2"></div>
-            <div className="flex-1">
-              <p className="text-dark"><span className="font-semibold">John Doe</span> published a new post</p>
-              <p className="text-sm text-dark/60">2 hours ago</p>
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-purple-500 w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                  <FileText size={24} />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-dark mb-1">{stats.totalEvents}</h3>
+              <p className="text-dark/60 text-sm">Total Events</p>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-orange-500 w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                  <FileText size={24} />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-dark mb-1">{stats.totalSermons}</h3>
+              <p className="text-dark/60 text-sm">Total Sermons</p>
             </div>
           </div>
-          <div className="flex items-start gap-4">
-            <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
-            <div className="flex-1">
-              <p className="text-dark"><span className="font-semibold">Jane Smith</span> uploaded 5 images</p>
-              <p className="text-sm text-dark/60">5 hours ago</p>
+
+          {/* Recent Posts */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-heading font-bold text-dark">Recent Posts</h2>
+              <Link href="/admin/posts" className="text-primary hover:text-primary-dark text-sm font-semibold">
+                View all →
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {recentPosts.length === 0 ? (
+                <p className="text-dark/60 text-center py-8">No posts yet. Create your first post!</p>
+              ) : (
+                recentPosts.map((post) => (
+                  <div key={post.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-cream transition-colors">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-dark mb-1">{post.title}</h3>
+                      <p className="text-sm text-dark/60">
+                        {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                      </p>
+                    </div>
+                    <div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        post.status === "PUBLISHED" 
+                          ? "bg-green-100 text-green-700" 
+                          : post.status === "DRAFT"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-blue-100 text-blue-700"
+                      }`}>
+                        {post.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
-          <div className="flex items-start gap-4">
-            <div className="w-2 h-2 rounded-full bg-green-500 mt-2"></div>
-            <div className="flex-1">
-              <p className="text-dark"><span className="font-semibold">Admin</span> created a new category</p>
-              <p className="text-sm text-dark/60">1 day ago</p>
-            </div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

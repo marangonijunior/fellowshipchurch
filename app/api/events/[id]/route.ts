@@ -6,11 +6,12 @@ import { generateSlug } from "@/lib/utils";
 // GET /api/events/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const event = await db.event.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!event) {
@@ -33,7 +34,7 @@ export async function GET(
 // PUT /api/events/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -44,11 +45,12 @@ export async function PUT(
       );
     }
 
+    const { id } = await context.params;
     const body = await request.json();
     const { title, type, description, details, date, time, location, image, status } = body;
 
     const existingEvent = await db.event.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingEvent) {
@@ -75,7 +77,7 @@ export async function PUT(
     }
 
     const event = await db.event.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
     });
 
@@ -92,7 +94,7 @@ export async function PUT(
 // DELETE /api/events/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -103,8 +105,9 @@ export async function DELETE(
       );
     }
 
+    const { id } = await context.params;
     await db.event.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Event deleted successfully" });

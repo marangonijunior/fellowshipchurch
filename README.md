@@ -103,7 +103,7 @@ Fellowship Church CMS is a full-stack web application designed to help church ad
 | **Framework** | [Next.js 15](https://nextjs.org/) (App Router) |
 | **Language** | [TypeScript 5.7](https://www.typescriptlang.org/) |
 | **Styling** | [Tailwind CSS 3.4](https://tailwindcss.com/) |
-| **Database** | [PostgreSQL](https://www.postgresql.org/) (Vercel Postgres) |
+| **Database** | [PostgreSQL](https://www.postgresql.org/) (Neon Postgres) |
 | **ORM** | [Prisma 5](https://www.prisma.io/) |
 | **Authentication** | [NextAuth.js v5 Beta](https://authjs.dev/) |
 | **File Storage** | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) |
@@ -115,9 +115,10 @@ Fellowship Church CMS is a full-stack web application designed to help church ad
 
 - **Next.js 15**: React Server Components, edge runtime, automatic optimizations
 - **TypeScript**: Type safety, better developer experience, fewer bugs
+- **Neon Postgres**: Serverless PostgreSQL with instant cold starts, branching, and generous free tier
 - **Prisma**: Type-safe database client, easy migrations, excellent DX
 - **Tailwind CSS**: Rapid UI development, consistent design system
-- **Vercel**: Zero-config deployment, edge network, integrated database
+- **Vercel**: Zero-config deployment, edge network, integrated storage
 
 ---
 

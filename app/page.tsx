@@ -2,8 +2,35 @@ import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
 import Link from "next/link";
 import { Calendar, MapPin, Clock } from "lucide-react";
+import db from "@/lib/db";
 
-export default function HomePage() {
+async function getHomeData() {
+  try {
+    const [sermons, posts] = await Promise.all([
+      db.sermon.findMany({
+        where: { status: "PUBLISHED" },
+        orderBy: { date: "desc" },
+        take: 4,
+      }),
+      db.post.findMany({
+        where: { status: "PUBLISHED", type: "BLOG" },
+        include: {
+          author: { select: { name: true } },
+          categories: { select: { name: true } },
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+      }),
+    ]);
+    return { sermons, posts };
+  } catch (error) {
+    console.error("Error fetching home data:", error);
+    return { sermons: [], posts: [] };
+  }
+}
+
+export default async function HomePage() {
+  const { sermons, posts } = await getHomeData();
   return (
     <>
       <Header />
@@ -30,7 +57,7 @@ export default function HomePage() {
         <div className="container-custom">
           <p className="text-dark/60 uppercase tracking-wide mb-4 text-center">Sub-headline</p>
           <h2 className="text-4xl md:text-5xl font-heading text-center mb-16">
-            A church that's relevant
+            A church that&apos;s relevant
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -180,54 +207,90 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="container-custom">
           <h2 className="text-4xl md:text-5xl font-heading text-center mb-16">
-            Upcoming sermons
+            Latest sermons
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { id: "1", date: "20", month: "July", title: "100 random acts of kindness" },
-              { id: "2", date: "20", month: "July", title: "Faith is a process, not a destination" },
-              { id: "3", date: "20", month: "July", title: "There is nothing impossible" },
-              { id: "4", date: "20", month: "July", title: "Celebrating freedom and life" },
-            ].map((sermon, index) => (
-              <div key={index} className="bg-cream-dark p-6 rounded-lg">
-                <p className="text-primary uppercase text-sm mb-4">Upcoming event</p>
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="text-center">
-                    <div className="text-4xl font-bold">{sermon.date}</div>
-                    <div className="text-sm uppercase">{sermon.month}</div>
-                  </div>
-                  <div className="flex-1">
+          {sermons.length === 0 ? (
+            <p className="text-center text-dark/60 py-12">No sermons available yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {sermons.map((sermon: any) => (
+                <div key={sermon.id} className="bg-cream-dark p-6 rounded-lg">
+                  <p className="text-primary uppercase text-sm mb-4">Sermon</p>
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="text-center">
+                      <div className="text-4xl font-bold">{new Date(sermon.date).getDate()}</div>
+                      <div className="text-sm uppercase">{new Date(sermon.date).toLocaleDateString('en-US', { month: 'short' })}</div>
+                    </div>
+                    <div className="flex-1">
                     <h3 className="text-xl font-heading font-semibold mb-4">
                       {sermon.title}
                     </h3>
-                    <p className="text-sm text-dark/70 mb-4">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.
+                    <p className="text-sm text-dark/70 mb-4 line-clamp-2">
+                      {sermon.description || "Join us for this inspiring message."}
                     </p>
                   </div>
                 </div>
-                <div className="space-y-2 text-sm text-dark/70">
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} />
-                    <span>Friday 23:39 IST<br/>Saturday 11/20 ISO</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} />
-                    <span>No 233 Main St. New York,<br/>United States</span>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <Link href={`/sermons/${sermon.id}`} className="text-dark font-semibold hover:text-primary transition-colors text-sm">
-                    View details →
-                  </Link>
-                </div>
+                <Link href={`/sermons/${sermon.id}`} className="text-dark font-semibold text-sm hover:text-primary transition-colors">
+                  View details →
+                </Link>
               </div>
             ))}
           </div>
+          )}
+        </div>
+      </section>
+
+      {/* Blog Section */}
+      <section className="py-20 bg-cream">
+        <div className="container-custom">
+          <div className="text-center mb-12">
+            <p className="text-primary uppercase text-sm mb-4">Read our blog</p>
+            <h2 className="text-4xl md:text-5xl font-heading">Latest articles</h2>
+          </div>
+
+          {posts.length === 0 ? (
+            <p className="text-center text-dark/60 py-12">No blog posts available yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {posts.map((post: any) => (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                >
+                  {post.featuredImage ? (
+                    <div
+                      className="h-48 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${post.featuredImage})` }}
+                    ></div>
+                  ) : (
+                    <div className="h-48 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                      <span className="text-6xl">📝</span>
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <p className="text-primary uppercase text-sm mb-3">
+                      {post.categories[0]?.name || "Blog"}
+                    </p>
+                    <h3 className="text-xl font-heading font-semibold mb-4">
+                      {post.title}
+                    </h3>
+                    <p className="text-sm text-dark/70 mb-4 line-clamp-2">
+                      {post.excerpt || post.content.substring(0, 100) + "..."}
+                    </p>
+                    <div className="text-sm text-dark/60">
+                      By {post.author.name}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-12">
-            <Link href="/sermons" className="btn-primary">
-              View all sermons
+            <Link href="/blog" className="btn-primary">
+              View all articles
             </Link>
           </div>
         </div>
@@ -252,53 +315,6 @@ export default function HomePage() {
             <div className="relative h-96 lg:h-full min-h-[400px] rounded-2xl overflow-hidden">
               <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1477281765962-ef34e8bb0967?q=80')] bg-cover bg-center"></div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Blog Section */}
-      <section className="py-20 bg-white">
-        <div className="container-custom">
-          <p className="text-dark/60 uppercase tracking-wide mb-4 text-center">Read our blog</p>
-          <h2 className="text-4xl md:text-5xl font-heading text-center mb-16">
-            Share, inspire, innovate
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { slug: "the-best-way-to-inspire-people", title: "The best way to inspire people", category: "Relationship" },
-              { slug: "how-to-show-compassion", title: "How to show compassion", category: "Relationship" },
-              { slug: "what-it-means-to-believe", title: "What it means to believe", category: "Faith" },
-              { slug: "the-biblical-purpose-of-money", title: "The biblical purpose of money", category: "Relationship" },
-            ].map((post, i) => (
-              <Link
-                key={i}
-                href={`/blog/${post.slug}`}
-                className="bg-cream-dark rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-              >
-                <div className="h-48 bg-gray-300"></div>
-                <div className="p-6">
-                  <p className="text-primary uppercase text-sm mb-3">{post.category}</p>
-                  <h3 className="text-xl font-heading font-semibold mb-4">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm text-dark/70 mb-4">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.
-                  </p>
-                  <div className="flex items-center text-sm text-dark/60">
-                    <span>By Mathew Johnson</span>
-                    <span className="mx-2">•</span>
-                    <span>Tuesday 13 May, 2018</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/blog" className="btn-primary">
-              View all posts
-            </Link>
           </div>
         </div>
       </section>

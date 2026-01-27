@@ -18,6 +18,21 @@ export async function getSiteSettings() {
       siteTagline: "Welcome to our community",
       primaryColor: "#FFD7A8",
       darkColor: "#1A1D23",
-    };
+      seoTitle: null,
+      seoDescription: null,
+      seoKeywords: null,
+      ogImage: null,
+      logo: null,
+      favicon: null,
+      address: null,
+      contactPhone: null,
+      contactEmail: null,
+      socialFacebook: null,
+      socialTwitter: null,
+      socialInstagram: null,
+      socialYoutube: null,
+      googleAnalyticsId: null,
+      facebookPixelId: null,
+    } as const;
   }
 }

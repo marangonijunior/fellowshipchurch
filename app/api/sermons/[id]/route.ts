@@ -6,11 +6,12 @@ import { generateSlug } from "@/lib/utils";
 // GET /api/sermons/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const sermon = await db.sermon.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!sermon) {
@@ -33,9 +34,10 @@ export async function GET(
 // PUT /api/sermons/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session || !["SUPER_ADMIN", "EDITOR", "AUTHOR"].includes(session.user.role)) {
       return NextResponse.json(
@@ -48,7 +50,7 @@ export async function PUT(
     const { title, description, details, date, time, location, preacher, image, status } = body;
 
     const existingSermon = await db.sermon.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!existingSermon) {
@@ -75,7 +77,7 @@ export async function PUT(
     }
 
     const sermon = await db.sermon.update({
-      where: { id: params.id },
+      where: { id: id },
       data: updateData,
     });
 
@@ -92,9 +94,10 @@ export async function PUT(
 // DELETE /api/sermons/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session || !["SUPER_ADMIN", "EDITOR"].includes(session.user.role)) {
       return NextResponse.json(
@@ -104,7 +107,7 @@ export async function DELETE(
     }
 
     await db.sermon.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     return NextResponse.json({ message: "Sermon deleted successfully" });

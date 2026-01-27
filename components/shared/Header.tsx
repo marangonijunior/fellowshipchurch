@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 
@@ -27,7 +28,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="text-2xl font-heading font-bold flex items-center gap-2">
             {logo ? (
-              <img src={logo} alt={siteName} className="h-10 w-auto" />
+              <Image src={logo} alt={siteName} width={120} height={40} className="h-10 w-auto" />
             ) : (
               <>
                 <span className="text-primary">[</span>{siteName}

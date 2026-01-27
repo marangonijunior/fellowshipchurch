@@ -45,7 +45,7 @@ export default function ContactPage() {
         <div className="relative container-custom h-full flex flex-col justify-center text-white">
           <p className="text-primary uppercase tracking-wide mb-4">Contact us</p>
           <h1 className="text-5xl md:text-6xl font-heading font-bold">
-            We'd love to hear from you
+            We&apos;d love to hear from you
           </h1>
         </div>
       </section>
@@ -105,12 +105,12 @@ export default function ContactPage() {
               Send us a message
             </h2>
             <p className="text-dark/70 text-center mb-8">
-              Fill out the form below and we'll get back to you as soon as possible.
+              Fill out the form below and we&apos;ll get back to you as soon as possible.
             </p>
 
             {submitStatus === "success" && (
               <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md">
-                Thank you for your message! We'll get back to you soon.
+                Thank you for your message! We&apos;ll get back to you soon.
               </div>
             )}
 
