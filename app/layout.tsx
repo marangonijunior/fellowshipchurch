@@ -31,6 +31,11 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: settings.siteName || "Fellowship Church",
     publisher: settings.siteName || "Fellowship Church",
     robots: "index, follow",
+    viewport: {
+      width: "device-width",
+      initialScale: 1,
+      maximumScale: 5,
+    },
     icons: {
       icon: settings.favicon || "/favicon.ico",
     },

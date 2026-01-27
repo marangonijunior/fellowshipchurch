@@ -8,8 +8,16 @@
     --font-poppins: 'Poppins', system-ui, sans-serif;
   }
 
+  * {
+    @apply box-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
-    @apply bg-cream text-dark antialiased;
+    @apply bg-cream text-dark antialiased overflow-x-hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {

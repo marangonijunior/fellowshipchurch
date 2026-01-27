@@ -18,9 +18,10 @@ export async function POST(request: NextRequest) {
     const media = await db.media.create({
       data: {
         url: body.url,
-        type: body.type,
-        fileName: body.fileName,
-        fileSize: body.fileSize,
+        filename: body.fileName,
+        mimetype: body.type,
+        size: body.fileSize,
+        uploadedBy: "system", // TODO: Get from session
       },
     });
     return NextResponse.json(media);

@@ -36,27 +36,27 @@ export default async function HomePage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-[600px] bg-gradient-to-r from-dark/80 to-dark/60">
+      <section className="relative min-h-[500px] h-[600px] lg:h-[700px] bg-gradient-to-r from-dark/80 to-dark/60">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80')] bg-cover bg-center opacity-30"></div>
-        <div className="relative container-custom h-full flex flex-col justify-center text-white">
-          <p className="text-primary uppercase tracking-wide mb-4">Welcome to our church</p>
-          <h1 className="text-5xl md:text-6xl font-heading font-bold mb-6 max-w-2xl">
+        <div className="relative container-custom h-full flex flex-col justify-center text-white px-4">
+          <p className="text-primary uppercase tracking-wide mb-4 text-sm md:text-base">Welcome to our church</p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-6 max-w-2xl leading-tight">
             Become a part of our community
           </h1>
           <Link href="/contact" className="btn-primary w-fit">
             Learn more
           </Link>
-          <p className="mt-8 text-gray-300 max-w-xl">
+          <p className="mt-6 md:mt-8 text-gray-300 max-w-xl text-sm md:text-base">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           </p>
         </div>
       </section>
 
       {/* A Church That's Relevant Section */}
-      <section className="py-20 bg-cream">
+      <section className="py-12 md:py-16 lg:py-20 bg-cream">
         <div className="container-custom">
-          <p className="text-dark/60 uppercase tracking-wide mb-4 text-center">Sub-headline</p>
-          <h2 className="text-4xl md:text-5xl font-heading text-center mb-16">
+          <p className="text-dark/60 uppercase tracking-wide mb-4 text-center text-xs md:text-sm">Sub-headline</p>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading text-center mb-8 md:mb-12 lg:mb-16 px-4">
             A church that&apos;s relevant
           </h2>
           

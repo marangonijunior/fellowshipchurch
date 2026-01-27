@@ -7,9 +7,9 @@ import { upload } from "@vercel/blob/client";
 type Media = {
   id: string;
   url: string;
-  type: string;
-  fileName: string;
-  fileSize: number;
+  mimetype: string;
+  filename: string;
+  size: number;
   createdAt: string;
 };
 
@@ -122,7 +122,7 @@ export default function MediaPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {media.map((item) => (
             <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-              {item.type.startsWith("image/") ? (
+              {item.mimetype.startsWith("image/") ? (
                 <div
                   className="h-48 bg-cover bg-center cursor-pointer"
                   style={{ backgroundImage: `url(${item.url})` }}
@@ -134,8 +134,8 @@ export default function MediaPage() {
                 </div>
               )}
               <div className="p-4">
-                <p className="text-sm font-medium truncate mb-1">{item.fileName}</p>
-                <p className="text-xs text-gray-500 mb-3">{formatFileSize(item.fileSize)}</p>
+                <p className="text-sm font-medium truncate mb-1">{item.filename}</p>
+                <p className="text-xs text-gray-500 mb-3">{formatFileSize(item.size)}</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => copyToClipboard(item.url)}
