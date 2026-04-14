@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUpload from "@/components/shared/ImageUpload";
+import RichTextEditor from "@/components/shared/RichTextEditor";
 
 export default function NewPostPage() {
   const router = useRouter();
@@ -135,12 +136,9 @@ export default function NewPostPage() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Content *
           </label>
-          <textarea
-            value={formData.content}
-            onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-            required
-            rows={15}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
+          <RichTextEditor
+            content={formData.content}
+            onChange={(content) => setFormData(prev => ({ ...prev, content }))}
             placeholder="Write your post content here..."
           />
         </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUpload from "@/components/shared/ImageUpload";
+import RichTextEditor from "@/components/shared/RichTextEditor";
 
 export default function NewSermonPage() {
   const router = useRouter();
@@ -134,12 +135,10 @@ export default function NewSermonPage() {
 
         <div>
           <label className="block text-sm font-medium mb-2">Description</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={4}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            placeholder="Brief description of the sermon"
+          <RichTextEditor
+            content={formData.description}
+            onChange={(description) => setFormData({ ...formData, description })}
+            placeholder="Write a detailed description of the sermon..."
           />
         </div>
 
