@@ -37,7 +37,7 @@ export default function AdminSidebar() {
   ];
 
   const filteredMenuItems = menuItems.filter(item => {
-    if (item.adminOnly && session?.user.role !== "SUPER_ADMIN") {
+    if (item.adminOnly && session?.user?.role !== "SUPER_ADMIN") {
       return false;
     }
     return true;

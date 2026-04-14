@@ -57,7 +57,8 @@ export async function PUT(
   try {
     const { id } = await context.params;
     const session = await auth();
-    if (!session || !["SUPER_ADMIN", "EDITOR", "AUTHOR"].includes(session.user.role)) {
+    const userRole = session?.user?.role;
+    if (!userRole || !["SUPER_ADMIN", "EDITOR", "AUTHOR"].includes(userRole)) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -81,7 +82,7 @@ export async function PUT(
     // Check if user owns the post or is admin/editor
     if (
       existingPost.authorId !== session.user.id &&
-      !["SUPER_ADMIN", "EDITOR"].includes(session.user.role)
+      !["SUPER_ADMIN", "EDITOR"].includes(userRole)
     ) {
       return NextResponse.json(
         { error: "Forbidden" },
@@ -157,7 +158,8 @@ export async function DELETE(
   try {
     const { id } = await context.params;
     const session = await auth();
-    if (!session || !["SUPER_ADMIN", "EDITOR"].includes(session.user.role)) {
+    const userRole = session?.user?.role;
+    if (!userRole || !["SUPER_ADMIN", "EDITOR"].includes(userRole)) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

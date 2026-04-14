@@ -39,7 +39,8 @@ export async function PUT(
   try {
     const { id } = await context.params;
     const session = await auth();
-    if (!session || !["SUPER_ADMIN", "EDITOR", "AUTHOR"].includes(session.user.role)) {
+    const userRole = session?.user?.role;
+    if (!userRole || !["SUPER_ADMIN", "EDITOR", "AUTHOR"].includes(userRole)) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -99,7 +100,8 @@ export async function DELETE(
   try {
     const { id } = await context.params;
     const session = await auth();
-    if (!session || !["SUPER_ADMIN", "EDITOR"].includes(session.user.role)) {
+    const userRole = session?.user?.role;
+    if (!userRole || !["SUPER_ADMIN", "EDITOR"].includes(userRole)) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

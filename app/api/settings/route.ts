@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await auth();
-    if (!session || session.user.role !== "SUPER_ADMIN") {
+    if (session?.user?.role !== "SUPER_ADMIN") {
       return NextResponse.json(
         { error: "Unauthorized - Super Admin access required" },
         { status: 401 }
