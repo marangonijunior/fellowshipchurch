@@ -4,16 +4,17 @@ import type { NextRequest } from "next/server"
 
 export async function middleware(request: NextRequest) {
   const session = await auth()
+  const userRole = session?.user?.role
   
   // Protect admin routes
   if (request.nextUrl.pathname.startsWith("/admin")) {
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.redirect(new URL("/login", request.url))
     }
     
     // Check if user has admin role
     const allowedRoles = ["SUPER_ADMIN", "EDITOR", "AUTHOR"]
-    if (!allowedRoles.includes(session.user.role)) {
+    if (!userRole || !allowedRoles.includes(userRole)) {
       return NextResponse.redirect(new URL("/", request.url))
     }
   }
