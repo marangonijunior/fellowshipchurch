@@ -4,6 +4,8 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +13,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [siteName, setSiteName] = useState("SDA Manager");
+  const [logo, setLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.siteName) setSiteName(data.siteName);
+        if (data.logo) setLogo(data.logo);
+      })
+      .catch((err) => console.error("Error loading settings:", err));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,9 +56,13 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <Link href="/" className="flex justify-center">
-            <span className="text-4xl font-heading font-bold text-dark">
-              <span className="text-primary">[</span>Finsweet
-            </span>
+            {logo ? (
+              <Image src={logo} alt={siteName} width={160} height={56} className="h-14 w-auto" />
+            ) : (
+              <span className="text-4xl font-heading font-bold text-dark">
+                {siteName || "SDA Manager"}
+              </span>
+            )}
           </Link>
           <h2 className="mt-6 text-center text-3xl font-heading font-bold text-dark">
             Sign in to your account

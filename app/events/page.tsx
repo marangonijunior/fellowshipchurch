@@ -1,5 +1,6 @@
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
+import NewsletterForm from "@/components/shared/NewsletterForm";
 import Link from "next/link";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import db from "@/lib/db";
@@ -178,16 +179,11 @@ export default async function EventsPage() {
           <p className="text-dark/70 mb-8 max-w-2xl mx-auto">
             Subscribe to our newsletter to receive updates about upcoming events, sermons, and church news.
           </p>
-          <form className="flex gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Your email address"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <button type="submit" className="btn-primary">
-              Subscribe
-            </button>
-          </form>
+          <NewsletterForm
+            source="events-page"
+            formClassName="flex gap-4 max-w-md mx-auto"
+            inputClassName="flex-1 px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
       </section>
 

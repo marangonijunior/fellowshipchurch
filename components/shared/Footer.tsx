@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Facebook, Twitter, Linkedin } from "lucide-react";
+import NewsletterForm from "@/components/shared/NewsletterForm";
 
 type Settings = {
   siteName?: string;
@@ -126,16 +127,10 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-6">
               Subscribe to get Latest Updates and News
             </h3>
-            <form className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Youremail@gmail.com"
-                className="flex-1 px-4 py-3 rounded-md bg-dark-light text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <button type="submit" className="btn-primary whitespace-nowrap">
-                Subscribe
-              </button>
-            </form>
+            <NewsletterForm
+              source="footer"
+              placeholder="Youremail@gmail.com"
+            />
           </div>
         </div>
       </div>

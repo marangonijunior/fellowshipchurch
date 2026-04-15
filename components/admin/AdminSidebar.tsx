@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   LayoutDashboard, 
   FileText, 
   Users, 
-  Image, 
+  Image as ImageIcon, 
   Settings, 
   LogOut,
   FolderOpen,
@@ -16,13 +17,26 @@ import {
   Calendar,
   Mic,
   Menu,
-  X
+  X,
+  Mail
 } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [siteName, setSiteName] = useState("SDA Manager");
+  const [logo, setLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.siteName) setSiteName(data.siteName);
+        if (data.logo) setLogo(data.logo);
+      })
+      .catch((err) => console.error("Error loading settings:", err));
+  }, []);
 
   const menuItems = [
     { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -31,7 +45,8 @@ export default function AdminSidebar() {
     { href: "/admin/events", icon: Calendar, label: "Events" },
     { href: "/admin/categories", icon: FolderOpen, label: "Categories" },
     { href: "/admin/tags", icon: Tags, label: "Tags" },
-    { href: "/admin/media", icon: Image, label: "Media" },
+    { href: "/admin/media", icon: ImageIcon, label: "Media" },
+    { href: "/admin/subscribers", icon: Mail, label: "Subscribers" },
     { href: "/admin/users", icon: Users, label: "Users", adminOnly: true },
     { href: "/admin/settings", icon: Settings, label: "Settings" },
   ];
@@ -71,10 +86,14 @@ export default function AdminSidebar() {
       `}>
         {/* Logo */}
         <div className="p-6 border-b border-dark-light">
-          <Link href="/" className="text-2xl font-heading font-bold">
-            <span className="text-primary">[</span>Finsweet
+          <Link href="/" className="text-2xl font-heading font-bold inline-flex items-center">
+            {logo ? (
+              <Image src={logo} alt={siteName} width={140} height={48} className="h-12 w-auto" />
+            ) : (
+              <span>{siteName || "SDA Manager"}</span>
+            )}
           </Link>
-          <p className="text-sm text-gray-400 mt-1">Admin Panel</p>
+          <p className="text-sm text-gray-400 mt-1">SDA Manager</p>
         </div>
 
         {/* User Info */}

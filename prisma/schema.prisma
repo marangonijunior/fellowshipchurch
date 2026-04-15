@@ -218,3 +218,13 @@ model SiteSettings {
 
   @@map("site_settings")
 }
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@map("subscribers")
+}

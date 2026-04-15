@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FileText, Users, Image, Eye, PlusCircle, Loader2 } from "lucide-react";
+import { FileText, Eye, PlusCircle, Loader2, Mail } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface Stats {
@@ -11,6 +11,7 @@ interface Stats {
   publishedPosts: number;
   totalEvents: number;
   totalSermons: number;
+  totalSubscribers: number;
 }
 
 interface RecentPost {
@@ -27,6 +28,7 @@ export default function AdminDashboard() {
     publishedPosts: 0,
     totalEvents: 0,
     totalSermons: 0,
+    totalSubscribers: 0,
   });
   const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,17 +39,21 @@ export default function AdminDashboard() {
         // Fetch all posts
         const postsRes = await fetch("/api/posts");
         const postsData = await postsRes.json();
-        const posts = postsData.success ? postsData.data : [];
+        const posts = postsData.posts || [];
 
         // Fetch events
         const eventsRes = await fetch("/api/events");
         const eventsData = await eventsRes.json();
-        const events = eventsData.success ? eventsData.data : [];
+        const events = eventsData.events || [];
 
         // Fetch sermons
         const sermonsRes = await fetch("/api/sermons");
         const sermonsData = await sermonsRes.json();
-        const sermons = sermonsData.success ? sermonsData.data : [];
+        const sermons = sermonsData.sermons || [];
+
+        const subscribersRes = await fetch("/api/subscribers");
+        const subscribersData = await subscribersRes.json();
+        const subscribers = Array.isArray(subscribersData) ? subscribersData : [];
 
         // Calculate stats
         setStats({
@@ -55,6 +61,7 @@ export default function AdminDashboard() {
           publishedPosts: posts.filter((p: any) => p.status === "PUBLISHED").length,
           totalEvents: events.length,
           totalSermons: sermons.length,
+          totalSubscribers: subscribers.length,
         });
 
         // Get recent posts (last 5)
@@ -99,6 +106,13 @@ export default function AdminDashboard() {
           <FileText size={20} />
           Manage Events
         </Link>
+        <Link
+          href="/admin/subscribers"
+          className="btn-outline inline-flex items-center gap-2"
+        >
+          <Mail size={20} />
+          View Subscribers
+        </Link>
       </div>
 
       {loading ? (
@@ -108,7 +122,7 @@ export default function AdminDashboard() {
       ) : (
         <>
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="bg-blue-500 w-12 h-12 rounded-lg flex items-center justify-center text-white">
@@ -147,6 +161,16 @@ export default function AdminDashboard() {
               </div>
               <h3 className="text-2xl font-bold text-dark mb-1">{stats.totalSermons}</h3>
               <p className="text-dark/60 text-sm">Total Sermons</p>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-rose-500 w-12 h-12 rounded-lg flex items-center justify-center text-white">
+                  <Mail size={24} />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-dark mb-1">{stats.totalSubscribers}</h3>
+              <p className="text-dark/60 text-sm">Subscribers</p>
             </div>
           </div>
 
