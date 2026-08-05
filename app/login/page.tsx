@@ -150,16 +150,6 @@ export default function LoginPage() {
             </Link>
           </div>
         </form>
-
-        {/* Demo Credentials */}
-        <div className="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-md">
-          <p className="text-xs font-semibold text-dark mb-2">Demo Credentials:</p>
-          <p className="text-xs text-dark/70">Email: admin@fellowshipchurch.com</p>
-          <p className="text-xs text-dark/70">Password: admin123</p>
-          <p className="text-xs text-dark/60 mt-2 italic">
-            Note: You need to create this user in the database first
-          </p>
-        </div>
       </div>
     </div>
   );
