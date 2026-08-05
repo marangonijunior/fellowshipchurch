@@ -32,7 +32,7 @@ export default function UsersPage() {
     try {
       const res = await fetch("/api/users");
       const data = await res.json();
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -97,8 +97,8 @@ export default function UsersPage() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "SUPER_ADMIN": return "bg-red-100 text-red-800";
-      case "ADMIN": return "bg-purple-100 text-purple-800";
       case "EDITOR": return "bg-blue-100 text-blue-800";
+      case "AUTHOR": return "bg-purple-100 text-purple-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };
@@ -155,8 +155,8 @@ export default function UsersPage() {
                 required
               >
                 <option value="VIEWER">Viewer</option>
+                <option value="AUTHOR">Author</option>
                 <option value="EDITOR">Editor</option>
-                <option value="ADMIN">Admin</option>
                 <option value="SUPER_ADMIN">Super Admin</option>
               </select>
             </div>

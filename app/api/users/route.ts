@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import db from "@/lib/db";
 import { auth } from "@/lib/auth";
+
+const VALID_ROLES = ["SUPER_ADMIN", "EDITOR", "AUTHOR", "VIEWER"];
 
 export async function GET() {
   try {
@@ -29,12 +32,26 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
-    if (!session?.user || !["SUPER_ADMIN", "ADMIN"].includes((session.user as any).role)) {
+    if (!session?.user || (session.user as any).role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const bcrypt = require("bcryptjs");
+
+    if (!body.name || !body.email || !body.password) {
+      return NextResponse.json(
+        { error: "Name, email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    if (!VALID_ROLES.includes(body.role)) {
+      return NextResponse.json(
+        { error: `Invalid role. Must be one of: ${VALID_ROLES.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
     const user = await db.user.create({
@@ -57,6 +74,10 @@ export async function POST(request: NextRequest) {
     if (error.code === "P2002") {
       return NextResponse.json({ error: "Email already exists" }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
+    console.error("Failed to create user:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to create user" },
+      { status: 500 }
+    );
   }
 }
